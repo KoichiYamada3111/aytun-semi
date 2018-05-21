@@ -63,7 +63,7 @@ def aytun():
     session['r'] += 1
 
     # When n is even
-    ifsession['n'] % 2  == 0:
+    if session['n'] % 2  == 0:
         if session['r'] == 1:
 
             # Assigning first pair which includes Aytun sensei
