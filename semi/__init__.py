@@ -143,15 +143,15 @@ def aytun():
             session['timer_name'] = session['attendance'][session['timer']-1]
 
             
-    return render_template('index.html', members = members, var_={{'attendance':session['attendance'],
-                                                                   'rotation_list':session['rotation_list'],
-                                                                   'com':session['com'],
-                                                                   'discussion_length':session['discussion_length'],
-                                                                   'n':session['n'],
-                                                                   'round':session['round'],
-                                                                   'num_pair':session['num_pair'],
-                                                                   'pair':session['pair'],
-                                                                   'timer':session['timer'],
-                                                                   'r':session['r'],
-                                                                   'timer_name':session['timer_name']}
-})
+    return render_template('index.html', members = members, var_={'attendance':session['attendance'],
+                                                                  'rotation_list':session['rotation_list'],
+                                                                  'com':session['com'],
+                                                                  'discussion_length':session['discussion_length'],
+                                                                  'n':session['n'],
+                                                                  'round':session['round'],
+                                                                  'num_pair':session['num_pair'],
+                                                                  'pair':session['pair'],
+                                                                  'timer':session['timer'],
+                                                                  'r':session['r'],
+                                                                  'timer_name':session['timer_name']}
+                                                                  )
