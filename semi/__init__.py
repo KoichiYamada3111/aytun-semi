@@ -1,18 +1,10 @@
-from flask import Flask, request, render_template, redirect, url_for
+from flask import Flask, request, render_template, redirect, url_for, session
 
 app = Flask(__name__)
 
 
-
 members = ['Akina','Daisuke','Douglus','Hayao',\
 'Ken','Nozomi','Saison','Sakura','Suji','Takao','Takashi','Yuya']
-
-num_mem = len(members)
-
-var = {'attendance':[], 'rotation_list':[], 'com':[],
-'discussion_length':0, 'n':None, 'round':0,
-'num_pair':0, 'pair':[], 'timer':None, 'r':0,
-'timer_name':None}
 
 break_time = 5
 buffer = 10
@@ -33,33 +25,29 @@ def index():
         import itertools
         
         # Initialize dictionary
-        var['discussion_length'] = 0
-        var['com'] = []
-        var['round'] = 0
-        var['num_pair'] = 0
-        var['pair'] = []
-        var['timer'] = None
-        var['r'] = 0
-        var['timer_name'] = None
+        session['com'] = []
+        session['pair'] = []
+        session['timer'] = None
+        session['r'] = 0
+        session['timer_name'] = None
 
+        session['attendance'] = request.form.getlist('attendance')
+        random.shuffle(session['attendance'])
+        session['attendance'].insert(0,'Aytun')
+        
+        session['rotation_list'] = [i for i in range(1,len(session['attendance'])+1)]
 
-        var['attendance'] = request.form.getlist('attendance')
+        session['n'] = len(session['rotation_list'])
 
-        random.shuffle(var['attendance'])
-        var['attendance'].insert(0,'Aytun')
-        var['rotation_list'] = [i for i in range(1,len(var['attendance'])+1)]
-        var['n'] = len(var['rotation_list'])
-
-        num_combination = var['n'] * var['n']-1/ 2
-        if var['n'] % 2 == 0:
-            var['round'] = var['n']-1  # num_combination / (var['n'] / 2)
+        if session['n'] % 2 == 0:
+            session['round'] = session['n']-1
         else:
-            var['round'] = var['n']
+            session['round'] = session['n']
 
-        var['num_pair'] = int(var['n'] // 2)
+        session['num_pair'] = int(session['n'] // 2)
         
         
-        var['discussion_length'] = (class_time - break_time - buffer) / var['round']
+        session['discussion_length'] = (class_time - break_time - buffer) / session['round']
 
         
     return redirect(url_for('aytun'))
@@ -72,86 +60,97 @@ def index():
 def aytun():
 
 
-    var['r'] += 1
+    session['r'] += 1
 
     # When n is even
-    if var['n'] % 2  == 0:
-        if var['r'] == 1:
+    ifsession['n'] % 2  == 0:
+        if session['r'] == 1:
 
             # Assigning first pair which includes Aytun sensei
-            var['pair'].append([var['rotation_list'][0],var['rotation_list'][1]])
-            var['rotation_list'].remove(var['rotation_list'][0])
-            var['rotation_list'].remove(var['rotation_list'][0])
+            session['pair'].append([session['rotation_list'][0],session['rotation_list'][1]])
+            session['rotation_list'].remove(session['rotation_list'][0])
+            session['rotation_list'].remove(session['rotation_list'][0])
 
             # Creating initial pair for first round (n/2 - 1 groups)
-            for i in range(var['num_pair']-1):
-                var['pair'].append([var['rotation_list'][0],var['rotation_list'][-1]])
-                var['rotation_list'].remove(var['rotation_list'][0])
-                var['rotation_list'].remove(var['rotation_list'][-1])
+            for i in range(session['num_pair']-1):
+                session['pair'].append([session['rotation_list'][0],session['rotation_list'][-1]])
+                session['rotation_list'].remove(session['rotation_list'][0])
+                session['rotation_list'].remove(session['rotation_list'][-1])
 
-            var['com'] = [[var['attendance'][mem-1] for mem in p] for p in var['pair']]
+            session['com'] = [[session['attendance'][mem-1] for mem in p] for p in session['pair']]
 
 
         #Updating pair for each round from 2nd round up to (n-1)th round
-        if 1 < var['r'] <= var['round']:
+        if 1 < session['r'] <= session['round']:
 
-            if var['pair'][0][1] < var['n']:
-                var['pair'][0][1] = var['pair'][0][1]+1
+            if session['pair'][0][1] < session['n']:
+                session['pair'][0][1] = session['pair'][0][1]+1
             else:
-                var['pair'][0][1] = 2
+                session['pair'][0][1] = 2
 
-            for i in range(var['num_pair']-1):
-                if var['pair'][i+1][0] == var['n']:
-                    var['pair'][i+1][0] = 2
+            for i in range(session['num_pair']-1):
+                if session['pair'][i+1][0] == session['n']:
+                    session['pair'][i+1][0] = 2
                 else:
-                    var['pair'][i+1][0] = var['pair'][i+1][0]+1
+                    session['pair'][i+1][0] = session['pair'][i+1][0]+1
 
-                if var['pair'][i+1][1] == var['n']:
-                    var['pair'][i+1][1] = 2
+                if session['pair'][i+1][1] == session['n']:
+                    session['pair'][i+1][1] = 2
                 else:
-                    var['pair'][i+1][1] = var['pair'][i+1][1]+1
+                    session['pair'][i+1][1] = session['pair'][i+1][1]+1
 
 
-            var['com'] = [[var['attendance'][mem-1] for mem in p] for p in var['pair']]
+            session['com'] = [[session['attendance'][mem-1] for mem in p] for p in session['pair']]
 
 
     # When n is uneven
     else:
-        if var['r'] == 1:
+        if session['r'] == 1:
 
             # Creating initial pair for first round (n/2  groups)
-            var['timer'] = var['rotation_list'][-1]
-            var['rotation_list'].remove(var['rotation_list'][-1])
+            session['timer'] = session['rotation_list'][-1]
+            session['rotation_list'].remove(session['rotation_list'][-1])
 
-            for i in range(var['num_pair']):
-                var['pair'].append([var['rotation_list'][0],var['rotation_list'][-1]])
-                var['rotation_list'].remove(var['rotation_list'][0])
-                var['rotation_list'].remove(var['rotation_list'][-1])
+            for i in range(session['num_pair']):
+                session['pair'].append([session['rotation_list'][0],session['rotation_list'][-1]])
+                session['rotation_list'].remove(session['rotation_list'][0])
+                session['rotation_list'].remove(session['rotation_list'][-1])
 
-            var['com'] = [[var['attendance'][mem-1] for mem in p] for p in var['pair']]
-            var['timer_name'] = var['attendance'][var['timer']-1]
+            session['com'] = [[session['attendance'][mem-1] for mem in p] for p in session['pair']]
+            session['timer_name'] = session['attendance'][session['timer']-1]
 
 
         #Updating pair for each round from 2nd round up to (n-1)th round
-        if 1 < var['r'] <= var['round']:
-            var['timer'] -= 1
+        if 1 < session['r'] <= session['round']:
+            session['timer'] -= 1
 
 
-            for i in range(var['num_pair']):
+            for i in range(session['num_pair']):
 
-                if var['pair'][i][0] == 1:
-                    var['pair'][i][0] = var['n']
+                if session['pair'][i][0] == 1:
+                    session['pair'][i][0] = session['n']
                 else:
-                    var['pair'][i][0] -= 1
+                    session['pair'][i][0] -= 1
 
-                if var['pair'][i][1] == 1:
-                    var['pair'][i][1] = var['n']
+                if session['pair'][i][1] == 1:
+                    session['pair'][i][1] = session['n']
                 else:
-                    var['pair'][i][1] -= 1
+                    session['pair'][i][1] -= 1
 
 
-            var['com'] = [[var['attendance'][mem-1] for mem in p] for p in var['pair']]
-            var['timer_name'] = var['attendance'][var['timer']-1]
+            session['com'] = [[session['attendance'][mem-1] for mem in p] for p in session['pair']]
+            session['timer_name'] = session['attendance'][session['timer']-1]
 
             
-    return render_template('index.html', members = members, var_=var)
+    return render_template('index.html', members = members, var_={{'attendance':session['attendance'],
+                                                                   'rotation_list':session['rotation_list'],
+                                                                   'com':session['com'],
+                                                                   'discussion_length':session['discussion_length'],
+                                                                   'n':session['n'],
+                                                                   'round':session['round'],
+                                                                   'num_pair':session['num_pair'],
+                                                                   'pair':session['pair'],
+                                                                   'timer':session['timer'],
+                                                                   'r':session['r'],
+                                                                   'timer_name':session['timer_name']}
+})
