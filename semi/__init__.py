@@ -2,6 +2,7 @@ from flask import Flask, request, render_template, redirect, url_for, session
 
 app = Flask(__name__)
 
+app.config['SECRET_KEY'] = 'X\xd8\xae\x02\xb0\x08\xd4\xc0'
 
 members = ['Akina','Daisuke','Douglus','Hayao',\
 'Ken','Nozomi','Saison','Sakura','Suji','Takao','Takashi','Yuya']
