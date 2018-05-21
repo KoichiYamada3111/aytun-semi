@@ -5,7 +5,7 @@ app = Flask(__name__)
 
 
 members = ['Akina','Daisuke','Douglus','Hayao',\
-'Ken','Nozomi','Saison','Sakura','Suji','Takao','Takashi','Yuya',]
+'Ken','Nozomi','Saison','Sakura','Suji','Takao','Takashi','Yuya']
 
 num_mem = len(members)
 
@@ -14,10 +14,15 @@ var = {'attendance':[], 'rotation_list':[], 'com':[],
 'num_pair':0, 'pair':[], 'timer':None, 'r':0,
 'timer_name':None}
 
+break_time = 5
+buffer = 10
+class_time = 90
 
+
+
+# Enter who attends
 @app.route('/', methods=['GET','POST'])
 def index():
-
 
 
     if request.method == 'GET':
@@ -27,6 +32,7 @@ def index():
         import random
         import itertools
         
+        # Initialize dictionary
         var['discussion_length'] = 0
         var['com'] = []
         var['round'] = 0
@@ -37,19 +43,11 @@ def index():
         var['timer_name'] = None
 
 
-        #mem = n()
-
         var['attendance'] = request.form.getlist('attendance')
 
         random.shuffle(var['attendance'])
         var['attendance'].insert(0,'Aytun')
-        #print(attendance)
-
-
-        #print(combination,'//',len(combination))
-
         var['rotation_list'] = [i for i in range(1,len(var['attendance'])+1)]
-
         var['n'] = len(var['rotation_list'])
 
         num_combination = var['n'] * var['n']-1/ 2
@@ -60,9 +58,6 @@ def index():
 
         var['num_pair'] = int(var['n'] // 2)
         
-        break_time = 5
-        buffer = 10
-        class_time = 90
         
         var['discussion_length'] = (class_time - break_time - buffer) / var['round']
 
@@ -72,13 +67,10 @@ def index():
 
 
 
-
+# Generate permutations
 @app.route('/Aytun')
 def aytun():
 
-
-    #print('How many rounds are there?:',round,'times')
-    #print('How many minutes for each round?:',discussion_length,'minutes','\n')
 
     var['r'] += 1
 
@@ -97,9 +89,6 @@ def aytun():
                 var['rotation_list'].remove(var['rotation_list'][0])
                 var['rotation_list'].remove(var['rotation_list'][-1])
 
-            #print("------------------------------------------\
-            #\n","This is 1st round"'\n', [[attendance[mem-1] for mem in p] for p in pair],'\n')
-            #input("Please press Enter to continue:\n")
             var['com'] = [[var['attendance'][mem-1] for mem in p] for p in var['pair']]
 
 
@@ -123,9 +112,6 @@ def aytun():
                     var['pair'][i+1][1] = var['pair'][i+1][1]+1
 
 
-            #print("------------------------------------------\
-            #\n","This is round", r+2,'\n', [[attendance[mem-1] for mem in p] for p in pair],'\n')
-            #input("Please press Enter to continue:\n")
             var['com'] = [[var['attendance'][mem-1] for mem in p] for p in var['pair']]
 
 
@@ -142,10 +128,6 @@ def aytun():
                 var['rotation_list'].remove(var['rotation_list'][0])
                 var['rotation_list'].remove(var['rotation_list'][-1])
 
-            #print("------------------------------------------\
-            #\n","This is 1st round"'\n', [[attendance[mem-1] for mem in p] for p in pair], \
-            #'Timer:',attendance[timer-1])
-            #input("Please press Enter to continue:\n")
             var['com'] = [[var['attendance'][mem-1] for mem in p] for p in var['pair']]
             var['timer_name'] = var['attendance'][var['timer']-1]
 
@@ -168,11 +150,8 @@ def aytun():
                     var['pair'][i][1] -= 1
 
 
-            #print("------------------------------------------\
-            #\n","This is round", r+2,'\n', [[attendance[mem-1] for mem in p] for p in pair],\
-            #'Timer:',attendance[timer-1],'\n')
-            #input("Please press Enter to continue:\n")
             var['com'] = [[var['attendance'][mem-1] for mem in p] for p in var['pair']]
             var['timer_name'] = var['attendance'][var['timer']-1]
-    
+
+            
     return render_template('index.html', members = members, var_=var)
