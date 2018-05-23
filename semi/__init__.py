@@ -7,10 +7,6 @@ app.config['SECRET_KEY'] = 'X\xd8\xae\x02\xb0\x08\xd4\xc0'
 members = ['Akina','Daisuke','Douglus','Hayao',\
 'Ken','Nozomi','Saison','Sakura','Suji','Takao','Takashi','Yuya']
 
-break_time = 5
-buffer = 10
-class_time = 90
-
 
 
 # Enter who attends
@@ -47,9 +43,6 @@ def index():
 
         session['num_pair'] = int(session['n'] // 2)
         
-        
-        session['discussion_length'] = (class_time - break_time - buffer) / session['round']
-
         
     return redirect(url_for('aytun'))
 
@@ -146,7 +139,6 @@ def aytun():
     return render_template('index.html', members = members, var_={'attendance':session['attendance'],
                                                                   'rotation_list':session['rotation_list'],
                                                                   'com':session['com'],
-                                                                  'discussion_length':session['discussion_length'],
                                                                   'n':session['n'],
                                                                   'round':session['round'],
                                                                   'num_pair':session['num_pair'],
